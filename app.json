@@ -3,6 +3,9 @@
     "name": "minga-orange-movile",
     "slug": "minga-orange-movile",
     "version": "1.0.0",
+    "extra": {
+      "apiUrl": "https://minga-movile.onrender.com/"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
