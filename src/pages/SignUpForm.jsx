@@ -41,7 +41,7 @@ const SignUpForm = ({ navigation, route }) => {
         axios
           .post(apiUrl + "auth/signin", dataUser)
           .then((res) => {
-            console.log(res);
+            console.log('Entramos');
             AsyncStorage.setItem("token", res.data.token)
               .then(() => console.log('Guardado en el storage'))
               .catch(err => console.log(err))
