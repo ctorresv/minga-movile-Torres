@@ -1,78 +1,46 @@
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, TextInput, Text, ImageBackground, View, ScrollView, TouchableOpacity } from 'react-native'
 import { AntDesign } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
 import axios from 'axios';
-import { useSelector, useDispatch } from 'react-redux'
-import mangasActions from '../../redux/actions/mangas'
+import { useSelector } from 'react-redux';
 
+import Constants from 'expo-constants';
 const apiUrl = Constants.manifest.extra.apiUrl || 'http://localhost:8000/';
 
-export const Mangas = ({ navigation }) => {
-  const { readOneManga } = mangasActions
-  const dispatch = useDispatch()
-  const [headers, setHeaders] = useState()
-  const [headersLoaded, setHeadersLoaded] = useState(false)
+export const MangaDetails = ({ navigation, route }) => {
+  const { cover_photo, title, description } = useSelector(store => store.inputManga)
+  const [id, setId] = useState('')
   const [mangas, setMangas] = useState([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(1)
+  const [chapter, setChapters] = useState([])
   const [hasMore, setHasMore] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
+  const [mangaLoading, setMangaLoading] = useState(true)
 
-  let getToken = async () => {
-    console.log('cargando token')
-    try {
-      let token = await AsyncStorage.getItem('token');
-      return token;
-    } catch (error) {
-      console.log('Error al obtener el token:', error);
-      return null;
-    }
-  };
-
-  let getHeaders = async () => {
-    console.log('cargando Header')
-    try {
-      let token = await getToken();
-      let headers = { headers: { 'Authorization': `Bearer ${token}` } };
-      return headers;
-    } catch (error) {
-      console.log('Error al obtener las headers:', error);
-      return null;
-    }
-  };
 
   useEffect(() => {
-    const loadHeaders = async () => {
-      let headers = await getHeaders();
-      setHeaders(headers)
-      setHeadersLoaded(true)
-      console.log(headers)
-    }
-    loadHeaders()
-  }, [])
+    setId(route.params?._id);
+  }, []);
 
-  const [searchManga, setSearchManga] = useState('')
+  useEffect(
+    () => {
+      if (id) {
+        axios(apiUrl + `chapters/get?manga_id=${id}&title=&page=${page}`)
+          .then(res => {
+            const chapters = res.data.response
+            setChapters((prevChapter) => [...prevChapter, ...chapters]);
+            if (chapters.length === 0) {
+              setHasMore(false);
+            }
+            console.log('Axios chapters Ejcutado')
+          })
+          .catch(err => console.log(err))
 
-  useEffect(() => {
-    console.log('Effect del axios')
-    if (headersLoaded) {
-      console.log('Axios en ejecución');
-      axios(apiUrl + `mangas/?title=&category_id=&author_id=&limit=&page=${page}`, headers)
-        .then(res => {
-
-          //console.log(JSON.stringify(res.data.response, null, 2));
-          const newMangas = res.data.response
-          setMangas((prevMangas) => [...prevMangas, ...newMangas]);
-          if (newMangas.length === 0) {
-            setHasMore(false);
-          }
-          console.log('Axios ejecutado');
-        })
-        .catch(err => console.log(err))
-    }
-    setIsLoading(false);
-  }, [headersLoaded, page]);
+      }
+      setIsLoading(false);
+    },
+    [id, page]
+  )
 
   const handleEndReached = () => {
     if (!isLoading && hasMore) {
@@ -80,35 +48,24 @@ export const Mangas = ({ navigation }) => {
     }
   };
 
-  const mangaDetails = (_id, title, cover_photo, description) => {
-    navigation.navigate('MangaDetails', { _id })
-    dispatch(readOneManga({
-      cover_photo,
-      title,
-      _id,
-      description
-    }))
-    console.log(_id)
-  }
-
-  console.log(mangas.length)
 
   return (
+
     <View style={styles.container}>
       <View style={styles.headerContainer}>
         <ImageBackground
-          source={require('../../assets/image/mangas.webp')}
+          source={{ uri: cover_photo }}
           style={styles.backgroundImage}
         >
           <View style={styles.overlay}>
-            <Text style={styles.title}>Mangas</Text>
+            <Text style={styles.title}>{title}</Text>
             <View style={styles.searchContainer}>
               <AntDesign name="search1" size={20} color="gray" style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
                 placeholder="Buscar"
-                value={searchManga}
-                onChangeText={setSearchManga}
+              /* value={searchManga} */
+              /* onChangeText={setSearchManga} */
               />
             </View>
           </View>
@@ -118,16 +75,11 @@ export const Mangas = ({ navigation }) => {
       <ImageBackground style={styles.scrollContainer} source={require('../../assets/image/paisaje.jpg')}>
         <ScrollView onScrollEndDrag={handleEndReached} >
           <View style={styles.cardsContainer}>
-            {mangas.map((card) => (
+            {chapter.map((card) => (
               <View key={card?._id} style={styles.card}>
                 <ImageBackground source={{ uri: card?.cover_photo }} style={styles.backgroundImage}>
                   <View style={styles.overlay}>
                     <Text style={styles.cardTitle}>{card.title}</Text>
-                    <View style={styles.backB}>
-                      <TouchableOpacity style={styles.buttonContainer} onPress={() => mangaDetails(card._id, card.title, card?.cover_photo, card.description)}>
-                        <Text style={styles.buttonText}>Details</Text>
-                      </TouchableOpacity>
-                    </View>
                   </View>
                 </ImageBackground>
               </View>
@@ -135,10 +87,9 @@ export const Mangas = ({ navigation }) => {
           </View>
         </ScrollView>
       </ImageBackground>
+
     </View>
-  );
-
-
+  )
 }
 
 const styles = StyleSheet.create({
