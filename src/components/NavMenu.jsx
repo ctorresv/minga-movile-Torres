@@ -133,9 +133,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderStyle: 'solid',
-    borderColor: '#dc143c',
   },
   textU: {
     fontSize: 25,
@@ -167,9 +164,6 @@ const styles = StyleSheet.create({
   user: {
     height: 50,
     flexDirection: 'row',
-    /* borderWidth: 2,
-    borderStyle: 'solid',
-    borderColor: '#dc143c', */
     justifyContent: 'center',
     alignItems: 'center',
     padding:10,

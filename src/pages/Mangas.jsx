@@ -123,6 +123,7 @@ export const Mangas = ({ navigation }) => {
                 <ImageBackground source={{ uri: card?.cover_photo }} style={styles.backgroundImage}>
                   <View style={styles.overlay}>
                     <Text style={styles.cardTitle}>{card.title}</Text>
+                    <Text style={styles.cardDescription}>{card.description}</Text>
                     <View style={styles.backB}>
                       <TouchableOpacity style={styles.buttonContainer} onPress={() => mangaDetails(card._id, card.title, card?.cover_photo, card.description)}>
                         <Text style={styles.buttonText}>Details</Text>
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
   card: {
     marginBottom: 20,
     borderRadius: 10,
-    height: 200,
+    height: 500,
     width: '100%',
     overflow: 'hidden',
   },
@@ -220,7 +221,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
     padding: 20,
-    fontFamily: '',
+  },
+  cardDescription: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: 'white',
+    padding: 20,
   },
   buttonContainer: {
     borderRadius: 5,
